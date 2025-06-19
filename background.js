@@ -12,7 +12,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   // Set default values
   const result = await chrome.storage.sync.get(['blockingEnabled', 'blockedSites']);
   blockingEnabled = result.blockingEnabled !== false;
-  blockedSites = result.blockedSites || [];
+  blockedSites = sanitizeBlockedSites(result.blockedSites);
   
   if (DEBUG) console.log('Meowed! Initialized with', blockedSites.length, 'blocked sites, blocking enabled:', blockingEnabled);
   
@@ -26,7 +26,7 @@ chrome.runtime.onStartup.addListener(async () => {
   // Reload settings
   const result = await chrome.storage.sync.get(['blockingEnabled', 'blockedSites']);
   blockingEnabled = result.blockingEnabled !== false;
-  blockedSites = result.blockedSites || [];
+  blockedSites = sanitizeBlockedSites(result.blockedSites);
   
   console.log('Meowed! Startup with', blockedSites.length, 'blocked sites, blocking enabled:', blockingEnabled);
   
@@ -41,7 +41,7 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
       await updateBlockingRules();
     }
     if (changes.blockedSites) {
-      blockedSites = changes.blockedSites.newValue || [];
+      blockedSites = sanitizeBlockedSites(changes.blockedSites.newValue);
       await updateBlockingRules();
     }
   }
@@ -49,6 +49,11 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 
 // Listen for messages from popup/content scripts
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  // Reject messages not coming from our own extension context
+  if (sender.id && sender.id !== chrome.runtime.id) {
+    if (DEBUG) console.warn('Meowed! Rejected message from unknown sender', sender.id);
+    return false;
+  }
   switch (message.action) {
     case 'toggleBlocking':
       blockingEnabled = message.enabled;
@@ -57,7 +62,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       break;
       
     case 'updateBlockingRules':
-      blockedSites = message.sites || [];
+      blockedSites = sanitizeBlockedSites(message.sites);
       await updateBlockingRules();
       sendResponse({ success: true });
       break;
@@ -157,6 +162,20 @@ function checkIfBlocked(url) {
 // dynamic declarativeNetRequest rules.  Keep a no-op stub to satisfy calls.
 async function updateBlockingRules() {
   return; // intentionally empty
+}
+
+// --- helper to enforce length limits and pattern sanity ---
+function sanitizeBlockedSites(rawList) {
+  if (!Array.isArray(rawList)) return [];
+  const cleaned = [];
+  for (const item of rawList) {
+    if (cleaned.length >= 500) break; // cap list size
+    if (!item || typeof item.url !== 'string') continue;
+    const url = item.url.trim();
+    if (!url || url.length > 256) continue; // skip over-long patterns
+    cleaned.push({ url, enabled: item.enabled !== false });
+  }
+  return cleaned;
 }
 
 // Content script handles all blocking overlays consistently 
