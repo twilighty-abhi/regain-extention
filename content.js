@@ -273,13 +273,4 @@
     performCheck();
   };
   
-  // 8. Periodic check as fallback (every 10 seconds)
-  setInterval(() => {
-    const currentUrl = location.href;
-    if (currentUrl !== lastUrl) {
-      lastUrl = currentUrl;
-      performCheck();
-    }
-  }, 10000);
-  
 })(); 

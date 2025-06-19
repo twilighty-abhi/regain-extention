@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Elements
   const globalToggle = document.getElementById('globalToggle');
   const notificationsToggle = document.getElementById('notificationsToggle');
+  const localStorageToggle = document.getElementById('localStorageToggle');
   const siteUrl = document.getElementById('siteUrl');
   const addSiteBtn = document.getElementById('addSiteBtn');
   const sitesList = document.getElementById('sitesList');
@@ -46,9 +47,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       settings = result.settings || {};
       globalToggle.checked = result.blockingEnabled !== false;
       notificationsToggle.checked = settings.showNotifications !== false;
+      localStorageToggle.checked = settings.storeLocal === true;
       
-      // Load sites
-      blockedSites = result.blockedSites || [];
+      const storageArea = settings.storeLocal ? chrome.storage.local : chrome.storage.sync;
+      const siteData = await storageArea.get(['blockedSites']);
+      blockedSites = siteData.blockedSites || [];
+      
       displaySites();
       updateSiteCount();
     } catch (error) {
@@ -61,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   function setupEventListeners() {
     globalToggle.addEventListener('change', saveGlobalToggle);
     notificationsToggle.addEventListener('change', saveNotificationToggle);
+    localStorageToggle.addEventListener('change', saveLocalStorageToggle);
     addSiteBtn.addEventListener('click', addSite);
     siteUrl.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') addSite();
@@ -103,6 +108,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
       console.error('Error saving notification toggle:', error);
       showToast('Error saving settings', 'error');
+    }
+  }
+
+  // Save local storage toggle
+  async function saveLocalStorageToggle() {
+    try {
+      settings.storeLocal = localStorageToggle.checked;
+      await chrome.storage.sync.set({ settings });
+      // migrate data when toggled
+      if (settings.storeLocal) {
+        await chrome.storage.local.set({ blockedSites });
+        await chrome.storage.sync.remove('blockedSites');
+      } else {
+        await chrome.storage.sync.set({ blockedSites });
+        await chrome.storage.local.remove('blockedSites');
+      }
+      showToast('Storage preference saved', 'success');
+    } catch(e){
+      console.error(e);
+      showToast('Error saving preference','error');
     }
   }
 
@@ -350,7 +375,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Save sites to storage
   async function saveSites() {
-    await chrome.storage.sync.set({ blockedSites: blockedSites });
+    const area = settings.storeLocal ? chrome.storage.local : chrome.storage.sync;
+    await area.set({ blockedSites });
     await chrome.runtime.sendMessage({
       action: 'updateBlockingRules',
       sites: blockedSites
@@ -359,6 +385,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Validate URL
   function isValidUrl(url) {
+    if (url.replace(/\*/g,'').trim()==='') return false;
     if (url.includes('*')) {
       return /^(\*\.)?[\w\-]+(\.[\w\-]+)*(\.\*)?$/.test(url) || 
              /^https?:\/\/(\*\.)?[\w\-]+(\.[\w\-]+)*/.test(url);
