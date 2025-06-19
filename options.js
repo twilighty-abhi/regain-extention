@@ -115,6 +115,17 @@ document.addEventListener('DOMContentLoaded', async function() {
       return;
     }
 
+    if (url.length > 256) {
+      showToast('Pattern too long (256 char max)', 'error');
+      return;
+    }
+
+    const illegal = /[\[\]{}+?]/;
+    if (illegal.test(url)) {
+      showToast('Wildcard pattern contains unsupported characters', 'error');
+      return;
+    }
+
     if (!isValidUrl(url)) {
       showToast('Please enter a valid URL or wildcard pattern', 'error');
       return;
