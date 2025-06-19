@@ -101,9 +101,16 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     case 'closeTab':
       if (sender.tab && sender.tab.id) {
         try {
+          const hasTabs = (await chrome.permissions.contains({ permissions: ['tabs'] }));
+          if (!hasTabs) {
+            const granted = await chrome.permissions.request({ permissions: ['tabs'] });
+            if (!granted) throw new Error('tabs permission denied');
+          }
           await chrome.tabs.remove(sender.tab.id);
           sendResponse({ success: true });
         } catch (error) {
+          // fallback attempt
+          try { await chrome.tabs.remove(sender.tab.id); } catch {}
           sendResponse({ error: 'Failed to close tab' });
         }
       } else {

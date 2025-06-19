@@ -12,7 +12,10 @@
   
   "permissions": [
     "storage",
-    "activeTab",
+    "activeTab"
+  ],
+  
+  "optional_permissions": [
     "tabs"
   ],
   
