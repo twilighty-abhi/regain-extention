@@ -251,7 +251,8 @@
     }
   });
   
-  urlObserver.observe(document, { childList: true });
+  const targetNode = document.body || document.documentElement;
+  urlObserver.observe(targetNode, { childList: true });
   
   // 6. Listen for browser navigation events
   window.addEventListener('popstate', performCheck);
@@ -272,13 +273,13 @@
     performCheck();
   };
   
-  // 8. Periodic check as fallback (every 3 seconds)
+  // 8. Periodic check as fallback (every 10 seconds)
   setInterval(() => {
     const currentUrl = location.href;
     if (currentUrl !== lastUrl) {
       lastUrl = currentUrl;
       performCheck();
     }
-  }, 3000);
+  }, 10000);
   
 })(); 
