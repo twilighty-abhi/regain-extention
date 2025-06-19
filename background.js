@@ -5,6 +5,10 @@ const DEBUG = false; // set to true for verbose logging
 let blockingEnabled = true;
 let blockedSites = [];
 
+// simple in-memory cache for checkBlocked results (URL -> {blocked, ts})
+const blockCache = new Map();
+const CACHE_TTL_MS = 3000;
+
 // Initialize on startup
 chrome.runtime.onInstalled.addListener(async () => {
   if (DEBUG) console.log('Meowed! extension installed');
@@ -70,9 +74,23 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     case 'checkBlocked':
       try {
         if (DEBUG) console.log('Meowed! Background checking URL:', message.url, 'Blocking enabled:', blockingEnabled, 'Sites count:', blockedSites.length);
-        const isBlocked = checkIfBlocked(message.url);
+        const urlToCheck = message.url;
+        const cached = blockCache.get(urlToCheck);
+        const now = Date.now();
+        if (cached && (now - cached.ts) < CACHE_TTL_MS) {
+          if (DEBUG) console.log('Meowed! Cache hit for', urlToCheck);
+          sendResponse({ blocked: cached.blocked });
+          break;
+        }
+
+        const isBlocked = checkIfBlocked(urlToCheck);
         const result = isBlocked && blockingEnabled;
-        if (DEBUG) console.log('Meowed! Check result:', result);
+        blockCache.set(urlToCheck, { blocked: result, ts: now });
+        if (blockCache.size > 1000) {
+          // rudimentary eviction to keep memory in check
+          blockCache.clear();
+        }
+        if (DEBUG) console.log('Meowed! Cache miss result:', result);
         sendResponse({ blocked: result });
       } catch (error) {
         console.error('Meowed! Error in checkBlocked:', error);
