@@ -146,7 +146,7 @@
   margin-bottom: 16px !important;
 }
 
-.btn {
+#website-blocker-overlay .btn {
   background: #f1f3f4 !important;
   color: #5f6368 !important;
   border: none !important;
@@ -165,23 +165,23 @@
   font-family: 'Roboto', Arial, sans-serif !important;
 }
 
-.btn:hover {
+#website-blocker-overlay .btn:hover {
   background: #e8eaed !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-.btn-primary {
+#website-blocker-overlay .btn-primary {
   background: #1a73e8 !important;
   color: white !important;
 }
 
-.btn-primary:hover {
+#website-blocker-overlay .btn-primary:hover {
   background: #1557b0 !important;
   box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25) !important;
 }
 
-.btn:focus {
+#website-blocker-overlay .btn:focus {
   outline: 2px solid #1a73e8 !important;
   outline-offset: 2px !important;
 }

@@ -29,8 +29,13 @@
       console.log('Meowed! response:', response);
       
       if (response && response.blocked) {
-        console.log('Meowed! blocking URL:', currentUrl);
+        if (DEBUG) console.log('Meowed! blocking URL:', currentUrl);
         showBlockingOverlay(currentUrl);
+      } else {
+        // Not blocked – ensure we clean up any previous overlay/blur
+        const ov = document.getElementById('website-blocker-overlay');
+        if (ov) ov.remove();
+        document.body.classList.remove('meowed-blur');
       }
     } catch(err){
       if (DEBUG) console.warn('Meowed! sendMessage failed:', err?.message);
@@ -207,6 +212,7 @@
     
     if (backBtnElement) {
       backBtnElement.addEventListener('click', () => {
+        removeOverlayAndBlur();
         if (window.history.length > 1) {
           history.back();
         } else {
@@ -272,5 +278,12 @@
     originalReplaceState.apply(history, args);
     performCheck();
   };
+  
+  // Add removeOverlay helper before showBlockingOverlay definition
+  function removeOverlayAndBlur(){
+    const ov = document.getElementById('website-blocker-overlay');
+    if (ov) ov.remove();
+    document.body.classList.remove('meowed-blur');
+  }
   
 })(); 
