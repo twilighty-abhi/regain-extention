@@ -1,18 +1,20 @@
 // Background service worker for website blocking
 
+const DEBUG = false; // set to true for verbose logging
+
 let blockingEnabled = true;
 let blockedSites = [];
 
 // Initialize on startup
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('Meowed! extension installed');
+  if (DEBUG) console.log('Meowed! extension installed');
   
   // Set default values
   const result = await chrome.storage.sync.get(['blockingEnabled', 'blockedSites']);
   blockingEnabled = result.blockingEnabled !== false;
   blockedSites = result.blockedSites || [];
   
-  console.log('Meowed! Initialized with', blockedSites.length, 'blocked sites, blocking enabled:', blockingEnabled);
+  if (DEBUG) console.log('Meowed! Initialized with', blockedSites.length, 'blocked sites, blocking enabled:', blockingEnabled);
   
   await updateBlockingRules();
 });
@@ -62,10 +64,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       
     case 'checkBlocked':
       try {
-        console.log('Meowed! Background checking URL:', message.url, 'Blocking enabled:', blockingEnabled, 'Sites count:', blockedSites.length);
+        if (DEBUG) console.log('Meowed! Background checking URL:', message.url, 'Blocking enabled:', blockingEnabled, 'Sites count:', blockedSites.length);
         const isBlocked = checkIfBlocked(message.url);
         const result = isBlocked && blockingEnabled;
-        console.log('Meowed! Check result:', result);
+        if (DEBUG) console.log('Meowed! Check result:', result);
         sendResponse({ blocked: result });
       } catch (error) {
         console.error('Meowed! Error in checkBlocked:', error);
@@ -122,14 +124,22 @@ function checkIfBlocked(url) {
       
       const pattern = site.url.toLowerCase();
       
+      // Basic length / sanity check
+      if (pattern.length > 256) return false;
+      
       // Handle wildcard patterns
       if (pattern.includes('*')) {
         const regexPattern = pattern
           .replace(/\./g, '\\.')
           .replace(/\*/g, '.*');
         
-        const regex = new RegExp('^' + regexPattern + '$');
-        return regex.test(hostname) || regex.test(url.toLowerCase());
+        try {
+          const regex = new RegExp('^' + regexPattern + '$');
+          return regex.test(hostname) || regex.test(url.toLowerCase());
+        } catch(e) {
+          if (DEBUG) console.warn('Invalid regex pattern derived from', pattern);
+          return false;
+        }
       }
       
       // Handle exact matches
@@ -138,76 +148,15 @@ function checkIfBlocked(url) {
              url.toLowerCase().includes(pattern);
     });
   } catch (error) {
-    console.error('Error checking blocked URL:', error);
+    if (DEBUG) console.error('Error checking blocked URL:', error);
     return false;
   }
 }
 
-// Update declarative net request rules
+// Since we now rely solely on the content script overlay, we do not need
+// dynamic declarativeNetRequest rules.  Keep a no-op stub to satisfy calls.
 async function updateBlockingRules() {
-  try {
-    // Clear existing rules
-    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-    const ruleIds = existingRules.map(rule => rule.id);
-    
-    if (ruleIds.length > 0) {
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: ruleIds
-      });
-    }
-    
-    // Don't add rules if blocking is disabled
-    if (!blockingEnabled || !blockedSites.length) {
-      return;
-    }
-    
-    // Create new rules
-    const rules = [];
-    let ruleId = 1;
-    
-    for (const site of blockedSites) {
-      if (!site.enabled) continue;
-      
-      const pattern = site.url.toLowerCase();
-      let urlFilter;
-      
-      // Convert wildcard patterns to URLFilter format
-      if (pattern.includes('*')) {
-        // Handle wildcard patterns
-        if (pattern.startsWith('*.')) {
-          // *.example.com -> *://*.example.com/*
-          urlFilter = `*://${pattern}/*`;
-        } else if (pattern.endsWith('.*')) {
-          // example.* -> *://example.*/*
-          urlFilter = `*://${pattern}/*`;
-        } else {
-          // other patterns
-          urlFilter = `*://*${pattern.replace(/\*/g, '')}*`;
-        }
-      } else {
-        // Exact domain matching
-        if (pattern.startsWith('http')) {
-          urlFilter = `${pattern}*`;
-        } else {
-          urlFilter = `*://${pattern}/*`;
-        }
-      }
-      
-      // Use content script for consistent blurred overlay experience
-      // No declarative rules needed - content script will handle everything
-    }
-    
-    // Add rules if any exist
-    if (rules.length > 0) {
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        addRules: rules
-      });
-    }
-    
-    console.log(`Updated blocking rules: ${rules.length} rules active`);
-  } catch (error) {
-    console.error('Error updating blocking rules:', error);
-  }
+  return; // intentionally empty
 }
 
 // Content script handles all blocking overlays consistently 

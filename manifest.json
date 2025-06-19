@@ -13,9 +13,7 @@
   "permissions": [
     "storage",
     "activeTab",
-    "tabs",
-    "declarativeNetRequest",
-    "scripting"
+    "tabs"
   ],
   
   "host_permissions": [
@@ -54,13 +52,7 @@
     }
   ],
   
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "blocking_rules",
-        "enabled": true,
-        "path": "rules.json"
-      }
-    ]
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 } 

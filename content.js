@@ -3,6 +3,8 @@
 (function() {
   'use strict';
 
+  const DEBUG = false;
+
   let checkTimeout;
   let hasChecked = false;
   
@@ -15,10 +17,11 @@
       return;
     }
     
-    console.log('Meowed! checking URL:', currentUrl);
+    if (DEBUG) console.log('Meowed! checking URL:', currentUrl);
     
+    let response;
     try {
-      const response = await chrome.runtime.sendMessage({
+      response = await chrome.runtime.sendMessage({
         action: 'checkBlocked',
         url: currentUrl
       });
@@ -29,12 +32,9 @@
         console.log('Meowed! blocking URL:', currentUrl);
         showBlockingOverlay(currentUrl);
       }
-    } catch (error) {
-      console.error('Meowed! Error checking blocked status:', error);
-      // Retry after a short delay if first attempt fails
-      setTimeout(() => {
-        checkCurrentPage();
-      }, 1000);
+    } catch(err){
+      if (DEBUG) console.warn('Meowed! sendMessage failed:', err?.message);
+      return;
     }
   }
   
@@ -252,7 +252,7 @@
   const urlObserver = new MutationObserver(() => {
     const currentUrl = location.href;
     if (currentUrl !== lastUrl) {
-      console.log('Meowed! URL changed from', lastUrl, 'to', currentUrl);
+      if (DEBUG) console.log('Meowed! URL changed from', lastUrl, 'to', currentUrl);
       lastUrl = currentUrl;
       performCheck();
     }
