@@ -80,21 +80,14 @@
     // Get random cat message
     const randomMessage = catMessages[Math.floor(Math.random() * catMessages.length)];
     
-    // Create a wrapper for the page content to blur
-    const pageContent = document.createElement('div');
-    pageContent.id = 'website-blocker-page-content';
-    
-    // Move all body children to the wrapper
-    while (document.body.firstChild) {
-      pageContent.appendChild(document.body.firstChild);
+    // Apply blur via CSS class instead of DOM swapping (CSP-safe & non-destructive)
+    if (!document.getElementById('meowed-blur-style')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'meowed-blur-style';
+      styleEl.textContent = `body.meowed-blur > *:not(#website-blocker-overlay){filter:blur(5px)!important;pointer-events:none!important}`;
+      document.head.appendChild(styleEl);
     }
-    
-    // Add the wrapper back to body
-    document.body.appendChild(pageContent);
-    
-    // Apply blur only to page content
-    pageContent.style.filter = 'blur(5px)';
-    pageContent.style.pointerEvents = 'none';
+    document.body.classList.add('meowed-blur');
     
     // Create overlay with CSP-compliant DOM creation
     const overlay = document.createElement('div');
@@ -258,12 +251,7 @@
     }
   });
   
-  urlObserver.observe(document, { 
-    subtree: true, 
-    childList: true,
-    attributes: true,
-    attributeFilter: ['href'] 
-  });
+  urlObserver.observe(document, { childList: true });
   
   // 6. Listen for browser navigation events
   window.addEventListener('popstate', performCheck);
