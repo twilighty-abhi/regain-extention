@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16">
+  <defs>
+    <linearGradient id="catGradient16" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6a4c93;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9c27b0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Cat face background -->
+  <circle cx="50" cy="55" r="35" fill="url(#catGradient16)" stroke="#fff" stroke-width="3"/>
+  
+  <!-- Cat ears -->
+  <path d="M25 30 L35 45 L15 45 Z" fill="url(#catGradient16)" stroke="#fff" stroke-width="3"/>
+  <path d="M75 30 L85 45 L65 45 Z" fill="url(#catGradient16)" stroke="#fff" stroke-width="3"/>
+  
+  <!-- Inner ears -->
+  <path d="M27 35 L32 42 L22 42 Z" fill="#ff69b4"/>
+  <path d="M77 35 L82 42 L72 42 Z" fill="#ff69b4"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="40" cy="50" rx="6" ry="8" fill="#fff"/>
+  <ellipse cx="60" cy="50" rx="6" ry="8" fill="#fff"/>
+  <ellipse cx="40" cy="50" rx="3" ry="5" fill="#333"/>
+  <ellipse cx="60" cy="50" rx="3" ry="5" fill="#333"/>
+  
+  <!-- Nose -->
+  <path d="M48 60 L52 60 L50 65 Z" fill="#ff69b4"/>
+  
+  <!-- Mouth -->
+  <path d="M50 65 Q45 70 40 67" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M50 65 Q55 70 60 67" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg> 

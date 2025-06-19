@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meowed!</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">Meowed! 🐱</h1>
+      <button id="settingsBtn" class="icon-btn" title="Settings">
+        <span class="material-icons">settings</span>
+      </button>
+    </div>
+
+    <!-- Toggle Switch -->
+    <div class="toggle-section">
+      <span class="toggle-label">Blocking Enabled</span>
+      <label class="switch">
+        <input type="checkbox" id="blockingToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Blocked Sites List -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Blocked Sites</h2>
+        <span id="siteCount" class="count">0 sites</span>
+      </div>
+      
+      <div id="blockedSitesList" class="sites-list">
+        <!-- Sites will be populated here -->
+      </div>
+      
+      <div id="emptySites" class="empty-state">
+        <span class="material-icons">block</span>
+        <p>No blocked sites</p>
+        <p class="subtitle">Click settings to add sites to block</p>
+      </div>
+    </div>
+
+    <!-- Quick Add -->
+    <div class="quick-add">
+      <div class="input-group">
+        <input type="text" id="quickAddInput" placeholder="Enter URL to block (e.g., *.facebook.com)">
+        <button id="quickAddBtn" class="add-btn">
+          <span class="material-icons">add</span>
+        </button>
+      </div>
+      
+      <!-- Block Current Site -->
+      <div class="current-site-section">
+        <button id="blockCurrentSiteBtn" class="block-current-btn">
+          <span class="material-icons">block</span>
+          Block This Site
+        </button>
+        <span id="currentSiteUrl" class="current-site-url">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button id="openOptionsBtn" class="text-btn">
+        <span class="material-icons">tune</span>
+        Advanced Settings
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html> 

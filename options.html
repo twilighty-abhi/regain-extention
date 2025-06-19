@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meowed! - Settings</title>
+  <link rel="stylesheet" href="options.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">
+          <span class="material-icons">block</span>
+          Meowed! Settings 🐱
+        </h1>
+        <p class="subtitle">Manage your blocked websites and cat preferences</p>
+      </div>
+    </header>
+
+    <!-- Settings Sections -->
+    <main class="main-content">
+      
+      <!-- General Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">
+          <span class="material-icons">tune</span>
+          General Settings
+        </h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Enable Cat Blocking</h3>
+            <p>Turn on/off the cat-powered website blocking</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="globalToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>Show Notifications</h3>
+            <p>Display notifications when sites are blocked</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notificationsToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Blocked Sites Management -->
+      <section class="settings-section">
+        <h2 class="section-title">
+          <span class="material-icons">web</span>
+          Blocked Websites
+        </h2>
+        
+        <!-- Add Site Form -->
+        <div class="add-site-form">
+          <div class="form-row">
+            <div class="input-group">
+              <label for="siteUrl">Website URL or Pattern</label>
+              <input 
+                type="text" 
+                id="siteUrl" 
+                placeholder="e.g., facebook.com or *.social-media.com"
+                autocomplete="off"
+              >
+              <div class="input-help">
+                <span class="material-icons">help_outline</span>
+                <div class="tooltip">
+                  You can use wildcards: *.example.com blocks all subdomains
+                </div>
+              </div>
+            </div>
+            <button id="addSiteBtn" class="btn-primary">
+              <span class="material-icons">add</span>
+              Add Site
+            </button>
+          </div>
+        </div>
+
+        <!-- Sites List -->
+        <div class="sites-container">
+          <div class="sites-header">
+            <span id="totalCount" class="sites-count">0 blocked sites</span>
+            <div class="bulk-actions">
+              <button id="clearAllBtn" class="btn-text">
+                <span class="material-icons">clear_all</span>
+                Clear All
+              </button>
+              <button id="exportBtn" class="btn-text">
+                <span class="material-icons">file_download</span>
+                Export
+              </button>
+              <button id="importBtn" class="btn-text">
+                <span class="material-icons">file_upload</span>
+                Import
+              </button>
+              <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+          </div>
+          
+          <div id="sitesList" class="sites-list">
+            <!-- Sites will be populated here -->
+          </div>
+          
+          <div id="emptySites" class="empty-state">
+            <span class="material-icons">web_off</span>
+            <h3>No blocked sites</h3>
+            <p>Add websites above to start blocking them</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Presets -->
+      <section class="settings-section">
+        <h2 class="section-title">
+          <span class="material-icons">playlist_add</span>
+          Quick Presets
+        </h2>
+        
+        <div class="presets-grid">
+          <div class="preset-card" data-preset="social">
+            <div class="preset-icon">📱</div>
+            <h3>Social Media</h3>
+            <p>Block popular social media sites</p>
+            <button class="btn-preset" data-preset="social">Add Preset</button>
+          </div>
+          
+          <div class="preset-card" data-preset="news">
+            <div class="preset-icon">📰</div>
+            <h3>News Sites</h3>
+            <p>Block news and media websites</p>
+            <button class="btn-preset" data-preset="news">Add Preset</button>
+          </div>
+          
+          <div class="preset-card" data-preset="entertainment">
+            <div class="preset-icon">🎬</div>
+            <h3>Entertainment</h3>
+            <p>Block video and gaming sites</p>
+            <button class="btn-preset" data-preset="entertainment">Add Preset</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html> 
